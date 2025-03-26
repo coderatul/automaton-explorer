@@ -1,0 +1,189 @@
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+    --primary: 221.2 83.2% 53.3%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 142.1 76.2% 36.3%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 221.2 83.2% 53.3%;
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --background: 222.2 18% 11%;
+    --foreground: 210 40% 98%;
+    --card: 222.2 18% 13%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222.2 18% 11%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 217.2 91.2% 59.8%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 217.2 15% 24%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217.2 15% 22%;
+    --muted-foreground: 215 20.2% 75%;
+    --accent: 142.1 70.6% 45.3%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 50.6%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217.2 15% 25%;
+    --input: 217.2 15% 25%;
+    --ring: 224.3 76.3% 48%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+.glass-panel {
+  @apply bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm;
+}
+
+/* Make sure resizable panels have proper height */
+.react-resizable-panel-group {
+  height: 100%;
+}
+
+/* Automaton Visualization Styling */
+.react-flow__edge-path {
+  stroke-width: 1.5;
+  stroke: #333;
+}
+
+.dark .react-flow__edge-path {
+  stroke: #aaa;
+}
+
+.react-flow__edge-text {
+  font-weight: bold;
+  fill: #228B22;
+  font-size: 14px;
+}
+
+.dark .react-flow__edge-text {
+  fill: #4ade80;
+}
+
+.react-flow__edge.selected .react-flow__edge-path {
+  stroke: hsl(var(--accent));
+  stroke-width: 2;
+}
+
+.react-flow__edge.animated .react-flow__edge-path {
+  stroke-dasharray: 5;
+  animation: dashdraw 0.5s linear infinite;
+}
+
+@keyframes dashdraw {
+  from {
+    stroke-dashoffset: 10;
+  }
+}
+
+/* State node styling */
+.node {
+  fill: white;
+  stroke: #333;
+  stroke-width: 1.5;
+}
+
+.dark .node {
+  fill: #2d3748;
+  stroke: #edf2f7;
+}
+
+.node.accepting {
+  /* Style for accepting states */
+}
+
+.node.active {
+  stroke: hsl(var(--accent));
+  animation: pulse-light 2s infinite;
+}
+
+.dark .node.active {
+  stroke: hsl(var(--accent));
+  animation: pulse-dark 2s infinite;
+}
+
+@keyframes pulse-light {
+  0% {
+    stroke-opacity: 1;
+  }
+  50% {
+    stroke-opacity: 0.6;
+  }
+  100% {
+    stroke-opacity: 1;
+  }
+}
+
+@keyframes pulse-dark {
+  0% {
+    stroke-opacity: 1;
+  }
+  50% {
+    stroke-opacity: 0.6;
+  }
+  100% {
+    stroke-opacity: 1;
+  }
+}
+
+/* React Flow Background in dark mode */
+.dark .react-flow__background {
+  background-color: #1a202c;
+}
+
+.dark .react-flow__controls {
+  background-color: #2d3748;
+  border-color: #4a5568;
+}
+
+.dark .react-flow__controls-button {
+  background-color: #2d3748;
+  border-color: #4a5568;
+  color: #edf2f7;
+}
+
+.dark .react-flow__node {
+  background-color: transparent;
+  color: #edf2f7;
+  border: none;
+  box-shadow: none;
+}
+
+/* Confetti animation */
+.confetti-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1000;
+}
