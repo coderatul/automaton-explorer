@@ -27,21 +27,12 @@ interface AutomatonContextType {
   importAutomaton: (json: string) => void;
 }
 
-const defaultStates = ["q0", "q1", "q2"];
-const defaultAlphabet = ["a", "b"];
-
 const defaultAutomaton: Automaton = {
-  states: defaultStates,
-  alphabet: defaultAlphabet,
-  transitions: [
-    { fromState: "q0", inputSymbol: "a", toState: "q1" },
-    { fromState: "q1", inputSymbol: "a", toState: "q1" },
-    { fromState: "q1", inputSymbol: "b", toState: "q2" },
-    { fromState: "q2", inputSymbol: "b", toState: "q2" },
-    { fromState: "q2", inputSymbol: "a", toState: "q1" }
-  ],
-  startState: "q0",
-  acceptingStates: ["q2"],
+  states: [],
+  alphabet: [],
+  transitions: [],
+  startState: "",
+  acceptingStates: [],
 };
 
 const defaultNodePositions: NodePositions = {};
@@ -52,7 +43,7 @@ export const useAutomaton = () => useContext(AutomatonContext);
 
 export const AutomatonProvider = ({ children }: { children: ReactNode }) => {
   const [automaton, setAutomatonState] = useState<Automaton>(defaultAutomaton);
-  const [testString, setTestString] = useState<string>("aabba");
+  const [testString, setTestString] = useState<string>("");
   const [result, setResult] = useState<AutomatonResult | null>(null);
   const [simulation, setSimulation] = useState<SimulationState>({
     status: SimulationStatus.IDLE,
@@ -231,7 +222,7 @@ export const AutomatonProvider = ({ children }: { children: ReactNode }) => {
   // Reset to default
   const resetAutomaton = useCallback(() => {
     setAutomatonState(defaultAutomaton);
-    setTestString("aabba");
+    setTestString("");
     resetSimulation();
     setNodePositions(defaultNodePositions);
     toast.success("Automaton reset to default");
