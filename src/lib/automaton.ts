@@ -1,5 +1,5 @@
 
-import { Automaton, AutomatonResult, Node, Edge, State, Symbol, Transition, TransitionStep, NodePositions, MarkerType } from "./types";
+import { Automaton, AutomatonResult, Node, Edge, State, Symbol, Transition, TransitionStep, NodePositions, MarkerType, AutomatonType } from "./types";
 
 export function processString(automaton: Automaton, input: string): AutomatonResult {
   const steps: TransitionStep[] = [];
@@ -236,4 +236,93 @@ export function updateGraphPositions(nodes: Node[], positionMap: NodePositions):
     }
     return node;
   });
+}
+
+// NFA to DFA conversion using subset construction algorithm
+export function convertNFAtoDFA(nfa: Automaton): Automaton {
+  if (nfa.type === AutomatonType.DFA) {
+    return nfa; // Already a DFA, return as is
+  }
+
+  // Helper function to get all states reachable from a set of states with a given symbol
+  function getNextStates(stateSet: Set<State>, symbol: Symbol): Set<State> {
+    const nextStates = new Set<State>();
+    for (const state of stateSet) {
+      const transitions = nfa.transitions.filter(
+        t => t.fromState === state && t.inputSymbol === symbol
+      );
+      transitions.forEach(t => nextStates.add(t.toState));
+    }
+    return nextStates;
+  }
+
+  // Convert a set of states to a string representation for DFA state naming
+  function setToStateName(stateSet: Set<State>): State {
+    if (stateSet.size === 0) return "∅";
+    return Array.from(stateSet).sort().join(",");
+  }
+
+  // Parse a DFA state name back to a set of NFA states
+  function stateNameToSet(stateName: State): Set<State> {
+    if (stateName === "∅") return new Set();
+    return new Set(stateName.split(","));
+  }
+
+  const dfaStates: State[] = [];
+  const dfaTransitions: Transition[] = [];
+  const dfaAcceptingStates: State[] = [];
+
+  // Start with the initial state
+  const startStateSet = new Set([nfa.startState]);
+  const startStateName = setToStateName(startStateSet);
+  
+  const unprocessedStates: Set<State>[] = [startStateSet];
+  const processedStateNames = new Set<State>();
+
+  while (unprocessedStates.length > 0) {
+    const currentStateSet = unprocessedStates.shift()!;
+    const currentStateName = setToStateName(currentStateSet);
+
+    if (processedStateNames.has(currentStateName)) {
+      continue;
+    }
+
+    processedStateNames.add(currentStateName);
+    dfaStates.push(currentStateName);
+
+    // Check if this is an accepting state (contains any NFA accepting state)
+    const isAccepting = Array.from(currentStateSet).some(state =>
+      nfa.acceptingStates.includes(state)
+    );
+    if (isAccepting) {
+      dfaAcceptingStates.push(currentStateName);
+    }
+
+    // Process each symbol in the alphabet
+    for (const symbol of nfa.alphabet) {
+      const nextStateSet = getNextStates(currentStateSet, symbol);
+      const nextStateName = setToStateName(nextStateSet);
+
+      // Add transition
+      dfaTransitions.push({
+        fromState: currentStateName,
+        inputSymbol: symbol,
+        toState: nextStateName
+      });
+
+      // Add to unprocessed if we haven't seen this state yet
+      if (!processedStateNames.has(nextStateName)) {
+        unprocessedStates.push(nextStateSet);
+      }
+    }
+  }
+
+  return {
+    type: AutomatonType.DFA,
+    states: dfaStates,
+    alphabet: nfa.alphabet,
+    transitions: dfaTransitions,
+    startState: startStateName,
+    acceptingStates: dfaAcceptingStates
+  };
 }

@@ -3,12 +3,13 @@ import { useState, useEffect } from "react";
 import { Plus, Trash2, Info, Download, Upload } from "lucide-react";
 import { toast } from "sonner";
 import { useAutomaton } from "@/context/AutomatonContext";
-import { State, Symbol, Transition } from "@/lib/types";
+import { State, Symbol, Transition, AutomatonType } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 export function InputSection() {
   const { 
@@ -172,6 +173,33 @@ export function InputSection() {
       </div>
       
       <div className="space-y-4">
+        <div className="space-y-2">
+          <Label>Automaton Type</Label>
+          <RadioGroup
+            value={automaton.type}
+            onValueChange={(value) => updateAutomaton({ type: value as AutomatonType })}
+            className="flex space-x-4"
+          >
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value={AutomatonType.DFA} id="dfa" />
+              <Label htmlFor="dfa" className="cursor-pointer font-normal">
+                DFA (Deterministic)
+              </Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value={AutomatonType.NFA} id="nfa" />
+              <Label htmlFor="nfa" className="cursor-pointer font-normal">
+                NFA (Non-deterministic)
+              </Label>
+            </div>
+          </RadioGroup>
+          {automaton.type === AutomatonType.NFA && (
+            <p className="text-xs text-muted-foreground">
+              NFA will be converted to DFA for simulation
+            </p>
+          )}
+        </div>
+
         <div className="space-y-2">
           <Label htmlFor="states">States (comma separated)</Label>
           <Input

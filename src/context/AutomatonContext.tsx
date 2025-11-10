@@ -1,7 +1,7 @@
 import { createContext, useContext, useState, ReactNode, useCallback, useEffect, useRef } from "react";
 import { toast } from "sonner";
-import { Automaton, TransitionStep, SimulationState, SimulationStatus, SimulationSpeed, AutomatonResult, NodePositions, Edge, Node } from "@/lib/types";
-import { processString, validateAutomaton, createGraphElements, updateGraphPositions } from "@/lib/automaton";
+import { Automaton, TransitionStep, SimulationState, SimulationStatus, SimulationSpeed, AutomatonResult, NodePositions, Edge, Node, AutomatonType } from "@/lib/types";
+import { processString, validateAutomaton, createGraphElements, updateGraphPositions, convertNFAtoDFA } from "@/lib/automaton";
 
 interface AutomatonContextType {
   automaton: Automaton;
@@ -28,6 +28,7 @@ interface AutomatonContextType {
 }
 
 const defaultAutomaton: Automaton = {
+  type: AutomatonType.DFA,
   states: [],
   alphabet: [],
   transitions: [],
@@ -112,8 +113,17 @@ export const AutomatonProvider = ({ children }: { children: ReactNode }) => {
       return;
     }
     
+    // Convert NFA to DFA if needed
+    const workingAutomaton = automaton.type === AutomatonType.NFA 
+      ? convertNFAtoDFA(automaton)
+      : automaton;
+    
+    if (automaton.type === AutomatonType.NFA) {
+      toast.info("NFA converted to DFA for simulation");
+    }
+    
     // Otherwise, start a new simulation
-    const newResult = processString(automaton, testString);
+    const newResult = processString(workingAutomaton, testString);
     setResult(newResult);
     
     setSimulation({
@@ -132,7 +142,16 @@ export const AutomatonProvider = ({ children }: { children: ReactNode }) => {
     
     // If we don't have a result yet, start a new simulation but in PAUSED state
     if (!result || simulation.status === SimulationStatus.IDLE) {
-      const newResult = processString(automaton, testString);
+      // Convert NFA to DFA if needed
+      const workingAutomaton = automaton.type === AutomatonType.NFA 
+        ? convertNFAtoDFA(automaton)
+        : automaton;
+      
+      if (automaton.type === AutomatonType.NFA) {
+        toast.info("NFA converted to DFA for simulation");
+      }
+      
+      const newResult = processString(workingAutomaton, testString);
       setResult(newResult);
       
       setSimulation({

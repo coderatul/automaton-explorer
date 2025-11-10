@@ -2,6 +2,11 @@
 export type State = string;
 export type Symbol = string;
 
+export enum AutomatonType {
+  DFA = "DFA",
+  NFA = "NFA"
+}
+
 export interface Transition {
   fromState: State;
   inputSymbol: Symbol;
@@ -9,6 +14,7 @@ export interface Transition {
 }
 
 export interface Automaton {
+  type: AutomatonType;
   states: State[];
   alphabet: Symbol[];
   transitions: Transition[];
