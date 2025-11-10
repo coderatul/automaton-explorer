@@ -238,6 +238,29 @@ export function updateGraphPositions(nodes: Node[], positionMap: NodePositions):
   });
 }
 
+// Check if transitions are deterministic (DFA) or non-deterministic (NFA)
+export function isDeterministic(transitions: Transition[]): boolean {
+  // Check if there are multiple transitions for the same state-symbol pair
+  const transitionMap = new Map<string, Set<string>>();
+  
+  for (const transition of transitions) {
+    const key = `${transition.fromState}-${transition.inputSymbol}`;
+    if (!transitionMap.has(key)) {
+      transitionMap.set(key, new Set());
+    }
+    transitionMap.get(key)!.add(transition.toState);
+  }
+  
+  // If any state-symbol pair has multiple destinations, it's non-deterministic
+  for (const destinations of transitionMap.values()) {
+    if (destinations.size > 1) {
+      return false;
+    }
+  }
+  
+  return true;
+}
+
 // NFA to DFA conversion using subset construction algorithm
 export function convertNFAtoDFA(nfa: Automaton): Automaton {
   if (nfa.type === AutomatonType.DFA) {

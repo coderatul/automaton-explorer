@@ -1,7 +1,7 @@
 import { createContext, useContext, useState, ReactNode, useCallback, useEffect, useRef } from "react";
 import { toast } from "sonner";
 import { Automaton, TransitionStep, SimulationState, SimulationStatus, SimulationSpeed, AutomatonResult, NodePositions, Edge, Node, AutomatonType } from "@/lib/types";
-import { processString, validateAutomaton, createGraphElements, updateGraphPositions, convertNFAtoDFA } from "@/lib/automaton";
+import { processString, validateAutomaton, createGraphElements, updateGraphPositions, convertNFAtoDFA, isDeterministic } from "@/lib/automaton";
 
 interface AutomatonContextType {
   automaton: Automaton;
@@ -63,6 +63,18 @@ export const AutomatonProvider = ({ children }: { children: ReactNode }) => {
   // Validate automaton when it changes
   useEffect(() => {
     const { valid, error } = validateAutomaton(automaton);
+    
+    // Check if transition table matches the selected type
+    if (valid && automaton.transitions.length > 0) {
+      const isTransitionsDeterministic = isDeterministic(automaton.transitions);
+      
+      if (automaton.type === AutomatonType.DFA && !isTransitionsDeterministic) {
+        setIsValidAutomaton(false);
+        setAutomatonError("You have selected DFA but your transition table is non-deterministic (NFA). Please choose NFA or modify your transitions.");
+        return;
+      }
+    }
+    
     setIsValidAutomaton(valid);
     setAutomatonError(error);
     
