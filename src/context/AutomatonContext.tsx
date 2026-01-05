@@ -1,7 +1,7 @@
 import { createContext, useContext, useState, ReactNode, useCallback, useEffect, useRef } from "react";
 import { toast } from "sonner";
 import { Automaton, TransitionStep, SimulationState, SimulationStatus, SimulationSpeed, AutomatonResult, NodePositions, Edge, Node, AutomatonType } from "@/lib/types";
-import { processString, validateAutomaton, createGraphElements, updateGraphPositions, convertNFAtoDFA, isDeterministic } from "@/lib/automaton";
+import { processString, validateAutomaton, createGraphElements, updateGraphPositions, convertNFAtoDFA, isDeterministic, checkDFACompleteness } from "@/lib/automaton";
 
 interface AutomatonContextType {
   automaton: Automaton;
@@ -72,6 +72,16 @@ export const AutomatonProvider = ({ children }: { children: ReactNode }) => {
         setIsValidAutomaton(false);
         setAutomatonError("You have selected DFA but your transition table is non-deterministic (NFA). Please choose NFA or modify your transitions.");
         return;
+      }
+      
+      // Check DFA completeness - every state must have a transition for every symbol
+      if (automaton.type === AutomatonType.DFA && automaton.states.length > 0 && automaton.alphabet.length > 0) {
+        const { complete, missingTransition } = checkDFACompleteness(automaton);
+        if (!complete && missingTransition) {
+          setIsValidAutomaton(false);
+          setAutomatonError(`DFA incomplete: Transition not defined for symbol '${missingTransition.symbol}' at state '${missingTransition.state}'. A DFA must have a transition for every symbol at every state.`);
+          return;
+        }
       }
     }
     
