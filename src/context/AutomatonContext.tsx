@@ -64,8 +64,14 @@ export const AutomatonProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     const { valid, error } = validateAutomaton(automaton);
     
+    if (!valid) {
+      setIsValidAutomaton(false);
+      setAutomatonError(error);
+      return;
+    }
+    
     // Check if transition table matches the selected type
-    if (valid && automaton.transitions.length > 0) {
+    if (automaton.transitions.length > 0) {
       const isTransitionsDeterministic = isDeterministic(automaton.transitions);
       
       if (automaton.type === AutomatonType.DFA && !isTransitionsDeterministic) {
@@ -73,15 +79,15 @@ export const AutomatonProvider = ({ children }: { children: ReactNode }) => {
         setAutomatonError("You have selected DFA but your transition table is non-deterministic (NFA). Please choose NFA or modify your transitions.");
         return;
       }
-      
-      // Check DFA completeness - every state must have a transition for every symbol
-      if (automaton.type === AutomatonType.DFA && automaton.states.length > 0 && automaton.alphabet.length > 0) {
-        const { complete, missingTransition } = checkDFACompleteness(automaton);
-        if (!complete && missingTransition) {
-          setIsValidAutomaton(false);
-          setAutomatonError(`DFA incomplete: Transition not defined for symbol '${missingTransition.symbol}' at state '${missingTransition.state}'. A DFA must have a transition for every symbol at every state.`);
-          return;
-        }
+    }
+    
+    // Check DFA completeness - every state must have a transition for every symbol
+    if (automaton.type === AutomatonType.DFA && automaton.states.length > 0 && automaton.alphabet.length > 0) {
+      const { complete, missingTransition } = checkDFACompleteness(automaton);
+      if (!complete && missingTransition) {
+        setIsValidAutomaton(false);
+        setAutomatonError(`DFA incomplete: Transition not defined for symbol '${missingTransition.symbol}' at state '${missingTransition.state}'. A DFA must have a transition for every symbol at every state.`);
+        return;
       }
     }
     
