@@ -8,6 +8,7 @@ export function processString(automaton: Automaton, input: string): AutomatonRes
   let stepCount = 0;
   let processedInput = "";
   let remainingInput = input;
+  let hasError = false;
 
   // Process each character in the input string
   for (let i = 0; i < input.length; i++) {
@@ -24,6 +25,7 @@ export function processString(automaton: Automaton, input: string): AutomatonRes
       });
       processedInput += char;
       remainingInput = input.substring(i + 1);
+      hasError = true;
       break;
     }
     
@@ -40,6 +42,7 @@ export function processString(automaton: Automaton, input: string): AutomatonRes
       });
       processedInput += char;
       remainingInput = input.substring(i + 1);
+      hasError = true;
       break;
     }
     
@@ -57,8 +60,8 @@ export function processString(automaton: Automaton, input: string): AutomatonRes
     stepCount++;
   }
   
-  // Check if the final state is an accepting state
-  accepted = automaton.acceptingStates.includes(currentState);
+  // Only accept if no errors occurred AND the final state is an accepting state
+  accepted = !hasError && automaton.acceptingStates.includes(currentState);
   
   return {
     accepted,
@@ -259,6 +262,21 @@ export function isDeterministic(transitions: Transition[]): boolean {
   }
   
   return true;
+}
+
+// Check if DFA is complete (every state has a transition for every symbol)
+export function checkDFACompleteness(automaton: Automaton): { complete: boolean, missingTransition?: { state: State, symbol: Symbol } } {
+  for (const state of automaton.states) {
+    for (const symbol of automaton.alphabet) {
+      const hasTransition = automaton.transitions.some(
+        t => t.fromState === state && t.inputSymbol === symbol
+      );
+      if (!hasTransition) {
+        return { complete: false, missingTransition: { state, symbol } };
+      }
+    }
+  }
+  return { complete: true };
 }
 
 // NFA to DFA conversion using subset construction algorithm
